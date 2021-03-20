@@ -7,3 +7,5 @@ Also included are sample data sets for learning about CoSeT
 
 About the current version (V6w):
 - first public release
+
+As far as I know it works. However provided as is, without warrranty.
