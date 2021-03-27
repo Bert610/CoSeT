@@ -116,12 +116,12 @@ Attribute VB_Name = "Module2"
     Const R_FIRST_DATA_ROW As Long = 5
     ' define the Start column #s and the Number of columns for each of the four tables on this sheet
     Const R_T1S As Long = 1
-    Const R_T1N As Long = 13
-    Const R_T2S As Long = 15
+    Const R_T1N As Long = 15
+    Const R_T2S As Long = 17
     Const R_T2N As Long = 6
-    Const R_T3S As Long = 22
+    Const R_T3S As Long = 24
     Const R_T3N As Long = 9
-    Const R_T4S As Long = 32
+    Const R_T4S As Long = 34
     Const R_T4N As Long = 7
 
     Const ANALYSIS_SHEET As String = "Analysis"
@@ -3541,7 +3541,7 @@ Public Function PopulateAnalysisSheet(loading_scores As Boolean) As Boolean
     Sheets(RESULTS_SHEET).Select
     Dim results_table_range As String, table_out_range As String
     results_table_range = "A" & R_FIRST_DATA_ROW & ":" & _
-                        c2l(R_T1N + num_criteria - 2) & _
+                        c2l(R_T1N + 2 * (num_criteria - 2)) & _
                             (num_projects * target_markers_per_proj + R_FIRST_DATA_ROW - 1)
     Dim results_table() As Variant
     results_table = Range(results_table_range)
@@ -3593,11 +3593,11 @@ Public Function PopulateAnalysisSheet(loading_scores As Boolean) As Boolean
             pn = results_table(i, 5)
             rdr_num = results_table(i, 3)
             table_out(pn, 1) = pn
-            If (IsEmpty(results_table(i, R_T1N + num_criteria - 2)) = False) And _
-                (Len(results_table(i, R_T1N + num_criteria - 2)) > 0) And _
-                (results_table(i, R_T1N + num_criteria - 3) = num_criteria) Then
+            If (IsEmpty(results_table(i, R_T1N + 2 * (num_criteria - 2))) = False) And _
+                (Len(results_table(i, R_T1N + 2 * (num_criteria - 2))) > 0) And _
+                (results_table(i, R_T1N + 2 * (num_criteria - 2) - 1) = num_criteria) Then
                 ' only use out non-blank, full-criteria project scores
-                table_out(pn, 1 + rdr_num) = results_table(i, R_T1N + num_criteria - 2)
+                table_out(pn, 1 + rdr_num) = results_table(i, R_T1N + 2 * (num_criteria - 2))
             End If
             table_out(pn, 2 + max_readers) = num_readers(pn)
         End If
@@ -3618,8 +3618,8 @@ Public Function PopulateAnalysisSheet(loading_scores As Boolean) As Boolean
     ' now repeat for the second table (normalized scores)
     ' load the normalized scores by criteria table from the third table on the results sheet
     Sheets(RESULTS_SHEET).Select
-    results_table_range = c2l(R_T3S + num_criteria - 2) & R_FIRST_DATA_ROW & ":" & _
-                          c2l(R_T3S + R_T3N + 2 * (num_criteria - 2) - 1) & _
+    results_table_range = c2l(R_T3S + 2 * (num_criteria - 2)) & R_FIRST_DATA_ROW & ":" & _
+                          c2l(R_T3S + R_T3N + 3 * (num_criteria - 2) - 1) & _
                             (num_projects * target_markers_per_proj + R_FIRST_DATA_ROW - 1)
     results_table = Range(results_table_range)
     
@@ -3649,8 +3649,8 @@ Public Function PopulateAnalysisSheet(loading_scores As Boolean) As Boolean
     If False Then
         ' load the 4th table to get the project rank
         Sheets(RESULTS_SHEET).Select
-        results_table_range = c2l(R_T4S + 2 * (num_criteria - 2)) & R_FIRST_DATA_ROW & ":" & _
-                            c2l(R_T4S + R_T4N + 3 * (num_criteria - 2) - 1) & _
+        results_table_range = c2l(R_T4S + 3 * (num_criteria - 2)) & R_FIRST_DATA_ROW & ":" & _
+                            c2l(R_T4S + R_T4N + 4 * (num_criteria - 2) - 1) & _
                                 (num_projects * target_markers_per_proj + R_FIRST_DATA_ROW - 1)
         results_table = Range(results_table_range)
         ' build a single column table for the project rank
@@ -4522,93 +4522,99 @@ Public Function ExpandResultsSheet()
     ' fill out the table with all the columns for the criteria
     ' first the table for the raw pxm criteria scores
     InsertAndExpandRight R_FIRST_RAW_COLUMN, 1, R_FIRST_DATA_ROW + 1, criteria_cols2add
+    InsertAndExpandRight R_FIRST_RAW_COLUMN + num_criteria, 1, R_FIRST_DATA_ROW + 1, criteria_cols2add
+    
     ' update the formulas in the marker normalization factor table
     Dim form_str As String, range1 As String, range2 As String, range3 As String, range4 As String
     Dim destn As String
     ' # of scores used =SUMIF(A:A,O5,L:L)
-    range1 = c2l(R_T2S + criteria_cols2add) & R_FIRST_DATA_ROW
-    range2 = c2l(R_T1N + criteria_cols2add - 1) & ":" & c2l(R_T1N + criteria_cols2add - 1)
+    range1 = c2l(R_T2S + 2 * criteria_cols2add) & R_FIRST_DATA_ROW
+    range2 = c2l(R_T1N + 2 * criteria_cols2add - 1) & ":" & c2l(R_T1N + 2 * criteria_cols2add - 1)
     form_str = "=SUMIF(A:A," & range1 & "," & range2 & ")"
-    destn = c2l(R_T2S + criteria_cols2add + 2) & R_FIRST_DATA_ROW
+    destn = c2l(R_T2S + 2 * criteria_cols2add + 2) & R_FIRST_DATA_ROW
     Range(destn).Value = form_str
     'next the count on the total of all the scores from that marker
     ' Total of Scores =IF(Q5>0,SUMIF($A:$A,O5,M:M),"")
-    range1 = c2l(R_T2S + criteria_cols2add) & R_FIRST_DATA_ROW
-    range2 = c2l(R_T2S + criteria_cols2add + 2) & R_FIRST_DATA_ROW
-    range3 = c2l(R_T1N + criteria_cols2add) & ":" & c2l(R_T1N + criteria_cols2add)
+    range1 = c2l(R_T2S + 2 * criteria_cols2add) & R_FIRST_DATA_ROW
+    range2 = c2l(R_T2S + 2 * criteria_cols2add + 2) & R_FIRST_DATA_ROW
+    range3 = c2l(R_T1N + 2 * criteria_cols2add) & ":" & c2l(R_T1N + 2 * criteria_cols2add)
     form_str = "=IF(" & range1 & ">0,SUMIF($A:$A," & range1 & "," & range3 & "),"""")"
-    destn = c2l(R_T2S + criteria_cols2add + 3) & R_FIRST_DATA_ROW
+    destn = c2l(R_T2S + 2 * criteria_cols2add + 3) & R_FIRST_DATA_ROW
     Range(destn).Value = form_str
     
     ' now the normalized pxm criteria scores
-    InsertAndExpandRight R_T3S + 6 + criteria_cols2add, 1, R_FIRST_DATA_ROW + 1, criteria_cols2add
+    InsertAndExpandRight R_T3S + 6 + 2 * criteria_cols2add, 1, R_FIRST_DATA_ROW + 1, criteria_cols2add
     ' Criteria 1 score (normalized) =IF(AND(LEN(H5)>0,$J5=1),H5*VLOOKUP($W5,$O:$T,6,FALSE),"")
-    range1 = "$" & c2l(R_T3S + criteria_cols2add + 1) & R_FIRST_DATA_ROW
-    range2 = "$" & c2l(R_T2S + criteria_cols2add) & ":$" & c2l(R_T2S + R_T2N - 1 + criteria_cols2add)
-    form_str = "=IF(AND(LEN(H" & R_FIRST_DATA_ROW & ")>0,$" & c2l(R_T1N + criteria_cols2add - 3) & _
+    range1 = "$" & c2l(R_T3S + 2 * criteria_cols2add + 1) & R_FIRST_DATA_ROW
+    range2 = "$" & c2l(R_T2S + 2 * criteria_cols2add) & ":$" & c2l(R_T2S + R_T2N - 1 + 2 * criteria_cols2add)
+    form_str = "=IF(AND(LEN(H" & R_FIRST_DATA_ROW & ")>0,$" & c2l(R_T1N + 2 * criteria_cols2add - 2) & _
                R_FIRST_DATA_ROW & "=1),H" & R_FIRST_DATA_ROW & "*VLOOKUP(" & range1 & "," & range2 & "," & _
                 R_T2N & ",FALSE),"""")"
-    destn = c2l(R_T3S + criteria_cols2add + 6) & R_FIRST_DATA_ROW
+    destn = c2l(R_T3S + 2 * criteria_cols2add + 6) & R_FIRST_DATA_ROW
     InsertAndDragRight destn, form_str, num_criteria
     
     ' now the normalized project scores by criteria
-    InsertAndExpandRight R_T4S + 2 * criteria_cols2add + 2, 1, R_FIRST_DATA_ROW + 1, criteria_cols2add
+    InsertAndExpandRight R_T4S + 3 * criteria_cols2add + 2, 1, R_FIRST_DATA_ROW + 1, criteria_cols2add
     'Project Name: =IF(AH5>0,VLOOKUP(AH5,E:F,2,FALSE),"")
-    range1 = c2l(R_T4S + 2 * criteria_cols2add) & R_FIRST_DATA_ROW
+    range1 = c2l(R_T4S + 3 * criteria_cols2add) & R_FIRST_DATA_ROW
     form_str = "=IF(" & range1 & ">0,VLOOKUP(" & range1 & ",E:F,2,FALSE),"""")"
-    destn = c2l(R_T4S + 2 * criteria_cols2add + 1) & R_FIRST_DATA_ROW
+    destn = c2l(R_T4S + 3 * criteria_cols2add + 1) & R_FIRST_DATA_ROW
     Range(destn).Value = form_str
     'for the table 4 project criteria =IF(SUMIF($T:$T,$AH5,Z:Z)=0,"",SUMIF($T:$T,$AH5,Z:Z)/$AN5)
-    range1 = "$" & c2l(R_T3S + criteria_cols2add) & ":$" & c2l(R_T3S + criteria_cols2add)
-    range2 = "$" & c2l(R_T4S + 2 * criteria_cols2add) & R_FIRST_DATA_ROW
-    range3 = c2l(R_T3S + criteria_cols2add + 6) & ":" & c2l(R_T3S + criteria_cols2add + 6)
-    range4 = c2l(R_T4S + 3 * criteria_cols2add + 4) & R_FIRST_DATA_ROW
+    range1 = "$" & c2l(R_T3S + 2 * criteria_cols2add) & ":$" & c2l(R_T3S + 2 * criteria_cols2add)
+    range2 = "$" & c2l(R_T4S + 3 * criteria_cols2add) & R_FIRST_DATA_ROW
+    range3 = c2l(R_T3S + 2 * criteria_cols2add + 6) & ":" & c2l(R_T3S + 2 * criteria_cols2add + 6)
+    range4 = c2l(R_T4S + 4 * criteria_cols2add + 4) & R_FIRST_DATA_ROW
     form_str = "=IF(SUMIF(" & range1 & "," & range2 & "," & range3 & ")=0,""""," & _
                    "SUMIF(" & range1 & "," & range2 & "," & range3 & ")/$" & range4 & ")"
-    destn = c2l(R_T4S + 2 * criteria_cols2add + 2) & R_FIRST_DATA_ROW
+    destn = c2l(R_T4S + 3 * criteria_cols2add + 2) & R_FIRST_DATA_ROW
     InsertAndDragRight destn, form_str, num_criteria
     
     ' now fill out the rows of the different tables
-    InsertAndExpandDown 1, R_FIRST_DATA_ROW, R_T1N + criteria_cols2add, pxm_rows2add
-    InsertAndExpandDown R_T2S + criteria_cols2add, R_FIRST_DATA_ROW, R_T2N, marker_rows2add
-    InsertAndExpandDown R_T3S + criteria_cols2add, R_FIRST_DATA_ROW, R_T3N + criteria_cols2add + 1, pxm_rows2add
-    InsertAndExpandDown R_T4S + 2 * criteria_cols2add, R_FIRST_DATA_ROW, R_T4N + criteria_cols2add, project_rows2add
+    InsertAndExpandDown 1, R_FIRST_DATA_ROW, R_T1N + 2 * criteria_cols2add, pxm_rows2add
+    InsertAndExpandDown R_T2S + 2 * criteria_cols2add, R_FIRST_DATA_ROW, R_T2N, marker_rows2add
+    InsertAndExpandDown R_T3S + 2 * criteria_cols2add, R_FIRST_DATA_ROW, R_T3N + criteria_cols2add + 1, pxm_rows2add
+    InsertAndExpandDown R_T4S + 3 * criteria_cols2add, R_FIRST_DATA_ROW, R_T4N + criteria_cols2add, project_rows2add
     
     ' some prettying up
-    Dim cn As Long
+    Dim cn As Long, i As Long
     cn = 1
     MergeVertical cn + 0, 2, 4
     MergeVertical cn + 1, 2, 4
     MergeVertical cn + 2, 2, 4
     MergeVertical cn + 3, 2, 4
     MergeVertical cn + 4, 2, 4
-    cn = R_T1N + criteria_cols2add
-    MergeVertical cn - 3, 2, 4
+    ' the columns checking whether we have a valid score
+    cn = R_T1N + 2 * criteria_cols2add - 4 - num_criteria
+    For i = 1 To num_criteria
+        MergeVertical cn + i, 2, 4
+    Next i
+    cn = R_T1N + 2 * criteria_cols2add
     MergeVertical cn - 2, 2, 4
     MergeVertical cn - 1, 2, 4
     MergeVertical cn - 0, 2, 4
-    cn = R_T2S + criteria_cols2add
+    cn = R_T2S + 2 * criteria_cols2add
     MergeVertical cn + 0, 2, 4
     MergeVertical cn + 1, 2, 4
     MergeVertical cn + 2, 2, 4
     MergeVertical cn + 3, 2, 4
     MergeVertical cn + 5, 2, 4
-    cn = R_T2S + 4 + criteria_cols2add
+    cn = R_T2S + 4 + 2 * criteria_cols2add
     Columns(c2l(cn) & ":" & c2l(cn + 1)).ColumnWidth = 8
-    cn = R_T3S + criteria_cols2add
+    cn = R_T3S + 2 * criteria_cols2add
     MergeVertical cn + 0, 2, 4
     MergeVertical cn + 1, 2, 4
     MergeVertical cn + 2, 2, 4
     MergeVertical cn + 3, 2, 4
     MergeVertical cn + 4, 2, 4
-    cn = R_T4S + 3 * criteria_cols2add
+    cn = R_T4S + 4 * criteria_cols2add
     MergeVertical cn + 4, 2, 4
     MergeVertical cn + 5, 2, 4
     AutofitOneColumn (R_T4S + 2 * criteria_cols2add + 1) ' project name in final score table
     ' make the gap columns between the tables narrow
-    ResizeToNarrowColumn (R_T1N + num_criteria - 2 + 1)
-    ResizeToNarrowColumn (R_T2S + num_criteria - 2 + R_T2N)
-    ResizeToNarrowColumn (R_T3S + 2 * (num_criteria - 2) + R_T3N)
+    ResizeToNarrowColumn (R_T1N + 2 * criteria_cols2add + 1)
+    ResizeToNarrowColumn (R_T2S + 2 * criteria_cols2add + R_T2N)
+    ResizeToNarrowColumn (R_T3S + 3 * criteria_cols2add + R_T3N)
 
 End Function
 
