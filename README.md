@@ -1,12 +1,12 @@
 # CoSeT
 Excel workbook with sheets and macros that support competitive selection processes (e.g., grant selection, hackathons ...).
 
-There is an acompanying guide document (CoSeT - The Guide), and several other support documents.
-Also included are sample data sets for learning about CoSeT.
+Significant upgrades with V7q to CoSeT including:
 
-About the current version (V6x):
-- Patch that fixes approach for counting valid scores (results sheet)
-- there is no installation script. 
-- Suggestion: 
--    extract the files/folders to a folder named CoSeT/.
--    create a separate folder tree for each competition with subfolders for files generated and exchanged
+more flexibility in specifying marker expertise
+better normalization
+add markers summary and projects summary sheets
+better support for online competitions (including import/export of score sheets)
+auto-generation of 14 charts to help analyze competition quality
+export of RTF format for marker comments
+auto generation of competition workbook from an online score sheet (one macro)
